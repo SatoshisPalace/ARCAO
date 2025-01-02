@@ -12,47 +12,46 @@ const LeaderboardContainer = styled.div`
   left: 0;
   width: 400px;
   height: 100vh;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.95) 100%);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 1.5vh;
-  color: white;
+  background: #fff;
+  padding: 20px;
+  color: #000;
   overflow-y: auto;
   z-index: 1000;
-  backdrop-filter: blur(10px);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 
   &::-webkit-scrollbar {
     width: 4px;
   }
 
   &::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
+    background: #f1f1f1;
     border-radius: 2px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
+    background: #ddd;
     border-radius: 2px;
     
     &:hover {
-      background: rgba(255, 255, 255, 0.3);
+      background: #ccc;
     }
   }
 `;
 
 const Section = styled.div`
-  padding: 1.5vh;
-  background: rgba(20, 20, 20, 0.7);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  margin-bottom: 1.5vh;
+  padding: 24px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+  border: 1px solid #f0f0f0;
 `;
 
 const SectionTitle = styled.h3`
-  color: #fff;
-  font-size: 1.2em;
-  font-weight: 600;
-  margin-bottom: 1vh;
-  text-transform: uppercase;
+  color: #000;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
 `;
 
 const ScrollableList = styled.div`
@@ -85,11 +84,9 @@ const PlayerEntry = styled.div<{ $highlight?: boolean }>`
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  background: ${props => props.$highlight 
-    ? 'linear-gradient(90deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.1) 100%)'
-    : 'linear-gradient(90deg, rgba(40, 40, 40, 0.9) 0%, rgba(30, 30, 30, 0.9) 100%)'};
-  border-radius: 6px;
-  margin-bottom: 4px;
+  background: ${props => props.$highlight ? 'linear-gradient(90deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.1) 100%)' : '#f8f9fa'};
+  border-radius: 12px;
+  margin-bottom: 8px;
 `;
 
 const PlayerInfoLeft = styled.div`
@@ -101,7 +98,7 @@ const PlayerInfoLeft = styled.div`
 
 const PlayerScore = styled.span`
   font-weight: 600;
-  color: #fff;
+  color: #000;
   text-align: right;
   margin-left: 12px;
 `;
@@ -109,7 +106,7 @@ const PlayerScore = styled.span`
 const Rank = styled.div<{ $color?: string }>`
   font-size: 1.1em;
   font-weight: bold;
-  color: ${props => props.$color || '#fff'};
+  color: ${props => props.$color || '#000'};
 `;
 
 const Badge = styled.span<{ type: 'gold' | 'silver' | 'bronze' }>`
@@ -119,28 +116,30 @@ const Badge = styled.span<{ type: 'gold' | 'silver' | 'bronze' }>`
 `;
 
 const StatsContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1vh;
-  margin-bottom: 2vh;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 20px 0;
 `;
 
 const StatBox = styled.div`
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 6px;
-  padding: 0.75vh;
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 16px;
   text-align: center;
+  flex: 1;
 
   .value {
     font-size: 0.9em;
     font-weight: bold;
-    color: #fff;
+    color: #000;
     margin-bottom: 0.375vh;
   }
 
   .label {
     font-size: 0.675em;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(0, 0, 0, 0.7);
     text-transform: uppercase;
   }
 `;
@@ -151,28 +150,62 @@ const RecentPlayer = styled.div<{ $isNew?: boolean }>`
   gap: 15px;
   align-items: center;
   padding: 1vh;
-  background: linear-gradient(90deg, rgba(40, 40, 40, 0.9) 0%, rgba(30, 30, 30, 0.9) 100%);
+  background: ${props => props.$isNew ? 'linear-gradient(90deg, rgba(40, 40, 40, 0.9) 0%, rgba(30, 30, 30, 0.9) 100%)' : '#f8f9fa'};
   border-radius: 6px;
   margin-bottom: 0.5vh;
 `;
 
 const RecentPlayerScore = styled.div`
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(0, 0, 0, 0.9);
   font-weight: 500;
   font-size: 0.9em;
 `;
 
 const TimeAgo = styled.div`
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(0, 0, 0, 0.6);
   font-size: 0.8em;
   white-space: nowrap;
 `;
 
-const PlayerInfoSection = styled.div`
-  padding: 1.5vh;
-  background: rgba(20, 20, 20, 0.7);
-  border-radius: 8px;
-  margin-bottom: 1.5vh;
+const UserInfoSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5vh;
+  margin-top: 1vh;
+  color: #000;
+  background: #fff;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+`;
+
+const UserInfoHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+
+  h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #000;
+  }
+`;
+
+const UserInfoStats = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 16px;
+  color: #000;
+`;
+
+const StatLine = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #000;
+  font-size: 16px;
 `;
 
 const ConnectPrompt = styled.div`
@@ -199,7 +232,7 @@ const PlayerStats = styled.div`
   flex-direction: column;
   gap: 0.5vh;
   margin-top: 1vh;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(0, 0, 0, 0.9);
 `;
 
 interface LeaderboardProps {
@@ -357,7 +390,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ gameId }) => {
 
   return (
     <LeaderboardContainer>
-      <PlayerInfoSection>
+      <UserInfoSection>
         <HeaderSection>
         <SectionTitle>Your Info</SectionTitle>
     {isConnected && address && (
@@ -391,7 +424,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ gameId }) => {
             <span>Connect your wallet to track your scores and compete on the leaderboard!</span>
           </ConnectPrompt>
         )}
-      </PlayerInfoSection>
+      </UserInfoSection>
 
       <Section>
         <SectionTitle>Top Players</SectionTitle>

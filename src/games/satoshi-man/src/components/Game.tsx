@@ -7,8 +7,8 @@ const BOARD_WIDTH = 28;
 const BOARD_HEIGHT = 25;
 const PACMAN_SPEED = 3;  // Slightly increased speed
 const GHOST_SPEED = 1.5;
-const WALL_COLOR = '#FFD700';  // Yellow color for walls
-const PLAYER_COLOR = '#FFFFFF';  // White color for player
+const WALL_COLOR = '#000000';  // Black color for walls
+const PLAYER_COLOR = '#000000';  // Yellow color for player
 const PLAYER_SIZE = 14;  // Slightly increased size
 
 const GameContainer = styled.div`
@@ -23,8 +23,8 @@ const GameContainer = styled.div`
 
 const Canvas = styled.canvas`
   border: 2px solid ${WALL_COLOR};
-  background-color: black;
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+  background-color: white;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
   width: ${CELL_SIZE * BOARD_WIDTH}px;
   height: ${CELL_SIZE * BOARD_HEIGHT}px;
   display: block;
@@ -180,8 +180,8 @@ const Game: React.FC<GameProps> = ({ onScoreUpdate, onGameOver, onRestart }) => 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Clear canvas
-    ctx.fillStyle = '#000000';
+    // Clear canvas with white background
+    ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     const { maze, pacman, ghosts } = gameStateRef.current;
@@ -204,7 +204,7 @@ const Game: React.FC<GameProps> = ({ onScoreUpdate, onGameOver, onRestart }) => 
             0,
             Math.PI * 2
           );
-          ctx.fillStyle = '#FFFFFF';
+          ctx.fillStyle = '#000000';
           ctx.fill();
           ctx.closePath();
         }
@@ -303,7 +303,7 @@ const Game: React.FC<GameProps> = ({ onScoreUpdate, onGameOver, onRestart }) => 
       if (gameStateRef.current.dots.has(dotKey)) {
         gameStateRef.current.dots.delete(dotKey);
         maze[gridY][gridX] = 0; // Remove dot from maze
-        scoreRef.current += 1; // Changed from 10 to 1 to balance with other games
+        scoreRef.current += 75; // Changed to 75 to make it slightly harder
         onScoreUpdate(scoreRef.current);
       }
     }

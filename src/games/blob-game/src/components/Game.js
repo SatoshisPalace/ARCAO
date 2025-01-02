@@ -109,8 +109,8 @@ const Game = ({ onGameOver }) => {
         const { ctx, viewport } = gameStateRef.current;
         if (!ctx) return;
 
-        // Draw vertical lines with white color and 0.2 opacity
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        // Draw vertical lines with light grey color
+        ctx.strokeStyle = 'rgba(200, 200, 200, 0.3)';
         ctx.lineWidth = 1;
         for (let x = 0; x < viewport.width; x += GRID_SIZE) {
             const offsetX = x - (viewport.x % GRID_SIZE);
@@ -121,7 +121,7 @@ const Game = ({ onGameOver }) => {
         }
         
         // Draw horizontal lines
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.strokeStyle = 'rgba(200, 200, 200, 0.3)';
         ctx.lineWidth = 1;
         for (let y = 0; y < viewport.height; y += GRID_SIZE) {
             const offsetY = y - (viewport.y % GRID_SIZE);
@@ -189,9 +189,6 @@ const Game = ({ onGameOver }) => {
         }
     }
     
-    
-    
-
     // Function to keep entities within bounds
     function checkBoundaries(entity) {
         let hitWall = false;
@@ -319,6 +316,9 @@ const Game = ({ onGameOver }) => {
                 isLargeBot: false
             });
         }
+    }
+
+    function updateBotBehavior(bot) {
     }
 
     function updateBotBehavior(bot) {
@@ -649,21 +649,31 @@ handleScoreUpdate(gameStateRef.current.currentScore);
             const dx = mouse.x - viewport.width / 2;
             const dy = mouse.y - viewport.height / 2;
             const distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance > 5) {
-                const speedMultiplier = Math.max(0.5, 2 - (player.radius / STARTING_RADIUS) * 0.5);
+            
+            // Minimum distance threshold for movement
+            const minDistance = 20;
+            
+            // Only move if we're beyond the minimum distance
+            if (distance > minDistance) {
+                const speedMultiplier = Math.max(1, 3 - (player.radius / STARTING_RADIUS) * 0.5);
                 const boostMultiplier = player.speedBoost ? 2 : 1;
-                const newX = player.x + (dx / distance) * player.speed * speedMultiplier * boostMultiplier;
-                const newY = player.y + (dy / distance) * player.speed * speedMultiplier * boostMultiplier;
                 
-                // Add this at the end of movement update
+                // Smooth movement interpolation
+                const targetX = player.x + (dx / distance) * player.speed * speedMultiplier * boostMultiplier;
+                const targetY = player.y + (dy / distance) * player.speed * speedMultiplier * boostMultiplier;
+                
+                // Apply smooth movement
+                player.x += (targetX - player.x) * 0.4;
+                player.y += (targetY - player.y) * 0.4;
+                
+                // Handle speed boost timeout
                 if (player.speedBoost && Date.now() > player.speedBoostEndTime) {
                     player.speedBoost = false;
                 }
                 
                 // Clamp position within world bounds
-                player.x = Math.max(player.radius, Math.min(WORLD_WIDTH - player.radius, newX));
-                player.y = Math.max(player.radius, Math.min(WORLD_HEIGHT - player.radius, newY));
+                player.x = Math.max(player.radius, Math.min(WORLD_WIDTH - player.radius, player.x));
+                player.y = Math.max(player.radius, Math.min(WORLD_HEIGHT - player.radius, player.y));
                 
                 // Update viewport (camera) position smoothly
                 viewport.x += (player.x - viewport.x) * 0.03;
@@ -674,7 +684,7 @@ handleScoreUpdate(gameStateRef.current.currentScore);
         updatePlayerPosition();
 
         // Clear canvas
-        ctx.fillStyle = 'black';
+        ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, viewport.width, viewport.height);
 
         // Draw grid
@@ -828,7 +838,7 @@ gameStateRef.current.currentScore += 10 * sizeIncrease; // Change to 10 points p
             isGameOver: false,
             scoreSubmitted: false,
             player: {
-                x: canvas.width / 2,
+                x: canvas.width / 2 + 100,
                 y: canvas.height / 2,
                 radius: STARTING_RADIUS,
                 style: playerStyle,
