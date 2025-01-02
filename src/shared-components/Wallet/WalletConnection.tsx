@@ -11,30 +11,22 @@ const WalletContainer = styled.div`
 `;
 
 const WalletButton = styled.button`
-  background: rgba(108, 92, 231, 0.2);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 0.8rem 1.5rem;
-  border-radius: 12px;
+  background: #eee;
+  color: black;
+  border: 1.5px solid black;
+  padding: 0.7rem 1.5rem;
+  border-radius: 0.3rem;
   cursor: pointer;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  font-weight: 500;
-  transition: all 0.3s ease;
-  
+  font-size: 14px;
+  transition: all 0.15s ease-in-out;
+
   &:hover {
-    background: rgba(108, 92, 231, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+    background-color: white;
   }
 
   &:disabled {
-    background: rgba(168, 168, 168, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
   }
 `;
 

@@ -14,13 +14,12 @@ canvas {
     display: block;
     position: absolute;
     top: 0;
-    left: 0;
-    width: 100%;
+    left: 220px; /* Start after leaderboard */
+    width: calc(100% - 220px); /* Account for leaderboard width */
     height: 100%;
-    background-color: black;
+    background-color: white;
     margin: 0;
     padding: 0;
-    border: 2px solid blue; /* Debug border */
 }
 
 .score {
@@ -309,10 +308,26 @@ canvas {
     animation: spin 1s ease-in-out infinite;
 }
 
-.end-game-button {
+.score-container {
     position: fixed;
     top: 20px;
     left: 20px;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border-radius: 8px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.score-container .score {
+    font-size: 24px;
+    margin: 0;
+}
+
+.end-game-button {
     padding: 10px 20px;
     background-color: #ff4444;
     color: white;
@@ -321,7 +336,6 @@ canvas {
     cursor: pointer;
     font-size: 16px;
     font-weight: bold;
-    z-index: 1000;
     transition: background-color 0.2s;
 }
 

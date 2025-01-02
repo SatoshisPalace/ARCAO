@@ -13,9 +13,9 @@ const GameContainer = styled.div`
 `;
 
 const Canvas = styled.canvas`
-  border: 2px solid #6c5ce7;
-  background-color: black;
-  box-shadow: 0 0 20px rgba(108, 92, 231, 0.3);
+  border: 4px solid black;
+  background-color: white;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
 `;
 
 const HUDContainer = styled.div`
@@ -167,7 +167,7 @@ const Game: React.FC<GameProps> = ({ onScoreUpdate, onGameOver, onRestart }) => 
     }
 
     if (linesCleared > 0) {
-      const newScore = scoreRef.current + linesCleared * 15;
+      const newScore = scoreRef.current + linesCleared * 500;
       updateScore(newScore);
     }
   };
@@ -185,7 +185,7 @@ const Game: React.FC<GameProps> = ({ onScoreUpdate, onGameOver, onRestart }) => 
       clearLines();
       state.currentPiece = createPiece();
       
-      const newScore = scoreRef.current + 1;
+      const newScore = scoreRef.current + 50;
       updateScore(newScore);
       
       if (collide(state.board, state.currentPiece)) {
@@ -256,7 +256,7 @@ const Game: React.FC<GameProps> = ({ onScoreUpdate, onGameOver, onRestart }) => 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.fillStyle = '#000';
+    ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Draw board
@@ -265,11 +265,27 @@ const Game: React.FC<GameProps> = ({ onScoreUpdate, onGameOver, onRestart }) => 
         if (value !== 0) {
           ctx.fillStyle = COLORS[value];
           ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-          ctx.strokeStyle = '#fff';
+          ctx.strokeStyle = 'black';
           ctx.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
         }
       });
     });
+
+        // Draw grid lines
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= canvas.width; i += BLOCK_SIZE) {
+          ctx.beginPath();
+          ctx.moveTo(i, 0);
+          ctx.lineTo(i, canvas.height);
+          ctx.stroke();
+        }
+        for (let i = 0; i <= canvas.height; i += BLOCK_SIZE) {
+          ctx.beginPath();
+          ctx.moveTo(0, i);
+          ctx.lineTo(canvas.width, i);
+          ctx.stroke();
+        }
 
     // Draw current piece
     const { shape, x, y } = gameStateRef.current.currentPiece;
@@ -283,7 +299,7 @@ const Game: React.FC<GameProps> = ({ onScoreUpdate, onGameOver, onRestart }) => 
             BLOCK_SIZE,
             BLOCK_SIZE
           );
-          ctx.strokeStyle = '#fff';
+          ctx.strokeStyle = 'black';
           ctx.strokeRect(
             (x + pieceX) * BLOCK_SIZE,
             (y + pieceY) * BLOCK_SIZE,

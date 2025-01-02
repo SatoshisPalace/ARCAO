@@ -12,9 +12,10 @@ const GameContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #000;
+  background: white;
   color: white;
   position: relative;
+  overflow: hidden;
 `;
 
 const SatoshiManGame: React.FC<{ gameId: string }> = ({ gameId }) => {

@@ -8,19 +8,19 @@ const GameContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: 30px auto 20px;
   width: fit-content;
   position: relative;
+  margin: 0 auto;
+  height: 100%;
 `;
 
 const Canvas = styled.canvas`
-  border: 2px solid #6c5ce7;
-  background-color: black;
-  box-shadow: 0 0 20px rgba(108, 92, 231, 0.3);
+  border: 4px solid black;
+  background-color: white;
 `;
 
 const HUDContainer = styled.div`
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -28,6 +28,7 @@ const HUDContainer = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 10px;
+  z-index: 1000;
 `;
 
 const Logo = styled.img`
@@ -345,8 +346,8 @@ const Game: React.FC<GameProps> = ({ onScoreUpdate, onGameOver, onRestart }) => 
       handleGameOver();
       return;
     } else if (ball.x >= CANVAS_WIDTH) {
-      // Player scored - increase score and continue
-      scoreRef.current += 1;
+      // Player scored - increase score by 500 and continue
+      scoreRef.current += 500;
       onScoreUpdate(scoreRef.current);
       resetBall();
     }
@@ -367,8 +368,8 @@ const Game: React.FC<GameProps> = ({ onScoreUpdate, onGameOver, onRestart }) => 
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
 
-    // Clear canvas with alpha for smooth motion blur effect
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+    // Clear canvas with white background
+    ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     // Draw center line
@@ -376,24 +377,34 @@ const Game: React.FC<GameProps> = ({ onScoreUpdate, onGameOver, onRestart }) => 
     ctx.beginPath();
     ctx.moveTo(CANVAS_WIDTH / 2, 0);
     ctx.lineTo(CANVAS_WIDTH / 2, CANVAS_HEIGHT);
-    ctx.strokeStyle = '#6c5ce7';
+    ctx.strokeStyle = 'black';
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Draw paddles with anti-aliasing
-    ctx.fillStyle = '#6c5ce7';
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = '#6c5ce7';
+    // Draw paddles with white fill and black border
+    ctx.fillStyle = 'white';
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 2;
     
-    ctx.fillRect(0, Math.round(gameStateRef.current.playerPaddle.y), PADDLE_WIDTH, PADDLE_HEIGHT);
-    ctx.fillRect(
+    // Player paddle
+    ctx.beginPath();
+    ctx.rect(0, Math.round(gameStateRef.current.playerPaddle.y), PADDLE_WIDTH, PADDLE_HEIGHT);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Computer paddle
+    ctx.beginPath();
+    ctx.rect(
       CANVAS_WIDTH - PADDLE_WIDTH,
       Math.round(gameStateRef.current.computerPaddle.y),
       PADDLE_WIDTH,
       PADDLE_HEIGHT
     );
+    ctx.fill();
+    ctx.stroke();
 
-    // Draw ball with anti-aliasing
+    // Draw ball in black
+    ctx.fillStyle = 'black';
     ctx.beginPath();
     ctx.arc(
       Math.round(gameStateRef.current.ball.x),
@@ -403,7 +414,6 @@ const Game: React.FC<GameProps> = ({ onScoreUpdate, onGameOver, onRestart }) => 
       Math.PI * 2
     );
     ctx.fill();
-    ctx.shadowBlur = 0;
   };
 
   useEffect(() => {
