@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { BazarProfile } from './types';
-import { dryrun } from '../../config/aoConnection';
 import { checkBazarProfile } from './utils/bazarProfile';
 
 interface WalletContextType {
