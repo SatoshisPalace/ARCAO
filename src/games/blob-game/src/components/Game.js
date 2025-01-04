@@ -6,6 +6,18 @@ import WalletConnection from '../../../../shared-components/Wallet/WalletConnect
 import { useScore } from '../../../../shared-components/Score/ScoreContext.tsx';
 import crownImage from '../assets/crowned.png';
 import {gatewayUrl} from '../../../../shared-components/Constants';
+import {
+    GAME_CONSTANTS,
+    checkCollision,
+    getBotAppearance,
+    getBotColor,
+    drawGrid,
+    drawCircle,
+    updateBots,
+    updatePlayerPosition,
+    spawnNewBot,
+    resetUsedProfiles
+} from './gameHelpers';
 
 // Load crown image
 const crown = new Image();
@@ -95,99 +107,6 @@ const Game = ({ onGameOver }) => {
     const BASE_GROWTH_RATE = 0.5;
     const SCORE_PENALTY_THRESHOLD = 100; // Every 100 points
     const GROWTH_PENALTY_FACTOR = 0.7; // Reduce growth by 30% every threshold
-
-    // Collision detection helper
-    const checkCollision = (x1, y1, r1, x2, y2, r2) => {
-      const dx = x2 - x1;
-      const dy = y2 - y1;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      return distance < r1 + r2;
-    };
-
-    // Drawing functions
-    function drawGrid() {
-        const { ctx, viewport } = gameStateRef.current;
-        if (!ctx) return;
-
-        // Draw vertical lines with light grey color
-        ctx.strokeStyle = 'rgba(200, 200, 200, 0.3)';
-        ctx.lineWidth = 1;
-        for (let x = 0; x < viewport.width; x += GRID_SIZE) {
-            const offsetX = x - (viewport.x % GRID_SIZE);
-            ctx.beginPath();
-            ctx.moveTo(offsetX, 0);
-            ctx.lineTo(offsetX, viewport.height);
-            ctx.stroke();
-        }
-        
-        // Draw horizontal lines
-        ctx.strokeStyle = 'rgba(200, 200, 200, 0.3)';
-        ctx.lineWidth = 1;
-        for (let y = 0; y < viewport.height; y += GRID_SIZE) {
-            const offsetY = y - (viewport.y % GRID_SIZE);
-            ctx.beginPath();
-            ctx.moveTo(0, offsetY);
-            ctx.lineTo(viewport.width, offsetY);
-            ctx.stroke();
-        }
-    }
-
-    function drawCircle(x, y, radius, style, isPlayer = false) {
-        console.log("Drawing circle: "+ style );
-        const { ctx } = gameStateRef.current;
-        if (!ctx) return;
-    
-        ctx.save(); // Save the current canvas state
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.closePath();
-        ctx.clip(); // Clip the drawing area to the circle
-    
-        if (typeof style === 'object' && style.useProfile && style.image) {
-            // Check if the image is cached
-            let img = imagePatternCache.get(style.image);
-            if (!img) {
-                img = new Image();
-                img.crossOrigin = "anonymous"; // To handle cross-origin images
-                img.src = style.image;
-    
-                img.onload = () => {
-                    imagePatternCache.set(style.image, img);
-                    // Redraw after the image loads
-                    ctx.drawImage(img, x - radius, y - radius, radius * 2, radius * 2);
-                };
-    
-                img.onerror = (error) => {
-                    console.error('Error loading image for circle:', error);
-                };
-    
-                // Use a fallback color while loading the image
-                ctx.fillStyle = style.color || '#000000';
-                ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
-            } else {
-                // Draw the image, ensuring it's locked to the circle
-                ctx.drawImage(img, x - radius, y - radius, radius * 2, radius * 2);
-            }
-        } else {
-            // If no image, use the provided color
-            ctx.fillStyle = typeof style === 'object' ? style.color : style;
-            ctx.fill();
-        }
-    
-        ctx.restore(); // Restore the canvas state
-    
-        if (isPlayer) {
-            // Add an outline for the player
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.strokeStyle = '#FFFFFF';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            ctx.strokeStyle = '#0066ff';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-        }
-    }
     
     // Function to keep entities within bounds
     function checkBoundaries(entity) {
@@ -395,158 +314,6 @@ const Game = ({ onGameOver }) => {
         }
     }
 
-    function updateBots() {
-        const botsToRemove = [];
-
-        for (const bot of gameStateRef.current.bots) {
-            // Update AI behavior
-            updateBotBehavior(bot);
-
-            // Calculate desired velocity
-            const dx = bot.targetX - bot.x;
-            const dy = bot.targetY - bot.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            if (distance > 0) {
-                const speed = bot.speed * (1 - (bot.radius / MAX_RADIUS) * 0.5);
-                
-                // Calculate new position
-                const targetVelX = (dx / distance) * speed;
-                const targetVelY = (dy / distance) * speed;
-
-                bot.currentVelX += (targetVelX - bot.currentVelX) * BOT_MOVEMENT_SMOOTHING;
-                bot.currentVelY += (targetVelY - bot.currentVelY) * BOT_MOVEMENT_SMOOTHING;
-
-                bot.x += bot.currentVelX;
-                bot.y += bot.currentVelY;
-            }
-
-            // Check collisions with food
-            const foodToRemove = [];
-            for (let i = 0; i < gameStateRef.current.foods.length; i++) {
-                const food = gameStateRef.current.foods[i];
-                if (checkCollision(bot.x, bot.y, bot.radius, food.x, food.y, FOOD_RADIUS)) {
-                    foodToRemove.push(i);
-                    
-                    // Calculate growth based on current size
-                    const sizeRatio = bot.radius / MAX_RADIUS;
-                    const growthFactor = Math.max(0.05, FOOD_GROWTH_RATE * (1 - sizeRatio));
-                    const sizeIncrease = growthFactor;
-                    
-                    // Update score and size
-                    bot.radius = Math.min(MAX_RADIUS, bot.radius + sizeIncrease);
-                }
-            }
-
-            // Remove eaten food
-            for (let i = foodToRemove.length - 1; i >= 0; i--) {
-                gameStateRef.current.foods.splice(foodToRemove[i], 1);
-            }
-
-            // Check collisions with player - do this before drawing
-            let skipRemainingCollisions = false;
-            if (checkCollision(bot.x, bot.y, bot.radius, gameStateRef.current.player.x, gameStateRef.current.player.y, gameStateRef.current.player.radius)) {
-                if (bot.radius > gameStateRef.current.player.radius) {
-                    // Bot eats player - game over with current score
-                    const finalScore = Math.floor(gameStateRef.current.currentScore);
-                    handleScoreUpdate(finalScore);
-                    handleGameOver();
-                    return;
-                } else {
-                    // Player eats bot
-// Player eats bot
-botsToRemove.push(bot);
-gameStateRef.current.player.radius += bot.radius * BOT_GROWTH_RATE;
-gameStateRef.current.currentScore += 100 + bot.radius; // 100 base points plus size value
-handleScoreUpdate(gameStateRef.current.currentScore);
-                    skipRemainingCollisions = true;
-                }
-            }
-
-            // Only skip remaining logic if the bot was eaten
-            if (skipRemainingCollisions) {
-                continue;
-            }
-
-            // Check collisions with other bots
-            for (const otherBot of gameStateRef.current.bots) {
-                if (bot === otherBot || botsToRemove.includes(bot) || botsToRemove.includes(otherBot)) continue;
-
-                if (checkCollision(bot.x, bot.y, bot.radius, otherBot.x, otherBot.y, otherBot.radius)) {
-                    if (bot.radius > otherBot.radius) {
-                        // This bot eats the other bot
-                        botsToRemove.push(otherBot);
-                        bot.radius += otherBot.radius * BOT_GROWTH_RATE;
-                    }
-                }
-            }
-
-            // Keep in bounds
-            const bounds = checkBoundaries(bot);
-            if (bounds.hitWall) {
-                bot.currentVelX *= 0.8;
-                bot.currentVelY *= 0.8;
-            }
-
-            // Draw bot
-            const screenX = bot.x - gameStateRef.current.viewport.x + gameStateRef.current.viewport.width / 2;
-            const screenY = bot.y - gameStateRef.current.viewport.y + gameStateRef.current.viewport.height / 2;
-            console.log(bot.style);
-            drawCircle(screenX, screenY, bot.radius, bot.style);
-        }
-
-        // Remove eaten bots and spawn new ones to maintain bot count
-        if (botsToRemove.length > 0) {
-            gameStateRef.current.bots = gameStateRef.current.bots.filter(bot => !botsToRemove.includes(bot));
-            
-            // Spawn new bots to replace eaten ones
-            for (let i = 0; i < botsToRemove.length; i++) {
-                const spawnQuadrant = Math.floor(Math.random() * 4);
-                let x, y;
-                
-                switch(spawnQuadrant) {
-                    case 0:
-                        x = Math.random() * (WORLD_WIDTH * 0.4);
-                        y = Math.random() * (WORLD_HEIGHT * 0.4);
-                        break;
-                    case 1:
-                        x = WORLD_WIDTH * 0.6 + Math.random() * (WORLD_WIDTH * 0.4);
-                        y = Math.random() * (WORLD_HEIGHT * 0.4);
-                        break;
-                    case 2:
-                        x = Math.random() * (WORLD_WIDTH * 0.4);
-                        y = WORLD_HEIGHT * 0.6 + Math.random() * (WORLD_HEIGHT * 0.4);
-                        break;
-                    case 3:
-                        x = WORLD_WIDTH * 0.6 + Math.random() * (WORLD_WIDTH * 0.4);
-                        y = WORLD_HEIGHT * 0.6 + Math.random() * (WORLD_HEIGHT * 0.4);
-                        break;
-                }
-
-                gameStateRef.current.bots.push({
-                    x,
-                    y,
-                    radius: STARTING_RADIUS * (0.8 + Math.random() * 0.4),
-                    color: `hsl(${Math.random() * 360}, 70%, 50%)`,
-                    speed: 2,
-                    targetX: x,
-                    targetY: y,
-                    lastDecision: 0,
-                    personality: Math.random(),
-                    currentVelX: 0,
-                    currentVelY: 0,
-                    isLargeBot: false
-                });
-            }
-        }
-    }
-
-    function getDistance(x1, y1, x2, y2) {
-        const dx = x2 - x1;
-        const dy = y2 - y1;
-        return Math.sqrt(dx * dx + dy * dy);
-    }
-
     // Handle game over
     const handleGameOver = async () => {
         if (gameStateRef.current.isGameOver) return;
@@ -641,54 +408,15 @@ handleScoreUpdate(gameStateRef.current.currentScore);
             return;
         }
 
-        // Update player position based on mouse
-        const updatePlayerPosition = () => {
-            const { player, mouse, viewport } = gameStateRef.current;
-            if (!mouse) return;
-
-            const dx = mouse.x - viewport.width / 2;
-            const dy = mouse.y - viewport.height / 2;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            // Minimum distance threshold for movement
-            const minDistance = 20;
-            
-            // Only move if we're beyond the minimum distance
-            if (distance > minDistance) {
-                const speedMultiplier = Math.max(1, 3 - (player.radius / STARTING_RADIUS) * 0.5);
-                const boostMultiplier = player.speedBoost ? 2 : 1;
-                
-                // Smooth movement interpolation
-                const targetX = player.x + (dx / distance) * player.speed * speedMultiplier * boostMultiplier;
-                const targetY = player.y + (dy / distance) * player.speed * speedMultiplier * boostMultiplier;
-                
-                // Apply smooth movement
-                player.x += (targetX - player.x) * 0.4;
-                player.y += (targetY - player.y) * 0.4;
-                
-                // Handle speed boost timeout
-                if (player.speedBoost && Date.now() > player.speedBoostEndTime) {
-                    player.speedBoost = false;
-                }
-                
-                // Clamp position within world bounds
-                player.x = Math.max(player.radius, Math.min(WORLD_WIDTH - player.radius, player.x));
-                player.y = Math.max(player.radius, Math.min(WORLD_HEIGHT - player.radius, player.y));
-                
-                // Update viewport (camera) position smoothly
-                viewport.x += (player.x - viewport.x) * 0.03;
-                viewport.y += (player.y - viewport.y) * 0.03;
-            }
-        };
-
-        updatePlayerPosition();
+// Update player position
+updatePlayerPosition(player, mouse, viewport);
 
         // Clear canvas
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, viewport.width, viewport.height);
 
         // Draw grid
-        drawGrid();
+        drawGrid(ctx, viewport);
 
         // Check food collisions and draw food
         const foodToRemove = [];
@@ -696,21 +424,15 @@ handleScoreUpdate(gameStateRef.current.currentScore);
             const screenX = food.x - viewport.x + viewport.width / 2;
             const screenY = food.y - viewport.y + viewport.height / 2;
 
-            // Check collision with player
-            if (checkCollision(player.x, player.y, player.radius, food.x, food.y, FOOD_RADIUS)) {
-                foodToRemove.push(index);
-                
-                // Calculate growth based on current size
-                const sizeRatio = player.radius / MAX_RADIUS;
-                const growthFactor = Math.max(0.05, FOOD_GROWTH_RATE * (1 - sizeRatio));
-                const sizeIncrease = growthFactor;
-                
-                // Update score and size
-gameStateRef.current.currentScore += 10 * sizeIncrease; // Change to 10 points per food
-                player.radius = Math.min(MAX_RADIUS, player.radius + sizeIncrease);
-                
-                handleScoreUpdate(gameStateRef.current.currentScore);
-            } else {
+// Check collision with player
+if (checkCollision(player.x, player.y, player.radius, food.x, food.y, GAME_CONSTANTS.FOOD.RADIUS)) {
+    foodToRemove.push(index);
+    const sizeRatio = player.radius / GAME_CONSTANTS.WORLD.MAX_SIZE;
+    const growthFactor = Math.max(0.05, GAME_CONSTANTS.GROWTH.FOOD_BLOB * (1 - sizeRatio));
+    gameStateRef.current.currentScore += GAME_CONSTANTS.POINTS.FOOD_BLOB;
+    player.radius = Math.min(GAME_CONSTANTS.WORLD.MAX_SIZE, player.radius + growthFactor);
+    handleScoreUpdate(gameStateRef.current.currentScore);
+}        else {
                 // Draw food if not eaten
                 if (food.score < MIN_EATABLE_SIZE) {
                     ctx.fillStyle = '#666666'; // Gray for non-eatable food
@@ -740,15 +462,23 @@ gameStateRef.current.currentScore += 10 * sizeIncrease; // Change to 10 points p
             });
         }
 
-        // Update and draw bots
-        if (gameStateRef.current.bots.length > 0) {
-            updateBots();
+// Update and draw bots
+if (gameStateRef.current.bots.length > 0) {
+    const callbacks = {
+        handleScoreUpdate,
+        handleGameOver,
+        spawnNewBot: (spawnQuadrant) => {
+            spawnNewBot(gameStateRef.current, spawnQuadrant);
         }
+    };
+    updateBots(gameStateRef.current, ctx, callbacks, imagePatternCache);
+}
+
 
         // Draw player
         const screenX = player.x - viewport.x + viewport.width / 2;
         const screenY = player.y - viewport.y + viewport.height / 2;
-        drawCircle(screenX, screenY, player.radius, player.style, true);
+        drawCircle(ctx, screenX, screenY, player.radius, player.style, true);
 
         animationFrameRef.current = requestAnimationFrame(gameLoop);
     }, [handleScoreUpdate]);
@@ -769,45 +499,12 @@ gameStateRef.current.currentScore += 10 * sizeIncrease; // Change to 10 points p
         return sizeBasedGrowth * penaltyMultiplier;
     };
 
-    // Add this function before initializeBots
-    const getBotAppearance = () => {
-        try {
-            const cache = JSON.parse(localStorage.getItem('bazarProfileCache') || '{}');
-            const validProfiles = Object.values(cache).filter(p => {
-                return p.profile && p.profile.ProfileImage && p.profile.ProfileImage !== "";
-            });
-            console.log(validProfiles);
-            console.log("AttemptingtogetProfile");
-            if (validProfiles.length > 0 && Math.random() < 0.75) {
-                const selectedProfile = validProfiles[Math.floor(Math.random() * validProfiles.length)];
-                console.log(`${gatewayUrl}${selectedProfile.profile.ProfileImage}`)
-                return {
-                    useProfile: true,
-                    image: `${gatewayUrl}${selectedProfile.profile.ProfileImage}`,
-                    color: `hsl(${Math.random() * 360}, 70%, 50%)`  // Fallback color
-                };
-            }
-        } catch (e) {
-            console.error('Error accessing bazarProfileCache:', e);
-        }
-        return {
-            useProfile: false,
-            color: `hsl(${Math.random() * 360}, 70%, 50%)`
-        };
-    };
-    
-    const getBotColor = () => {
-        return getBotAppearance().color;
-    };
-
     // Initialize game
     const initGame = useCallback(() => {
-        console.log('Initializing game...');
-        if (!canvasRef.current) {
-            console.log('No canvas reference');
-            return;
-        }
+        if (!canvasRef.current || gameInitializedRef.current) return;
 
+        resetUsedProfiles(); // Reset used profiles before starting new game
+        
         const canvas = canvasRef.current;
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;

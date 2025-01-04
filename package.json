@@ -16,7 +16,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-"build": "cross-env DISABLE_ESLINT_PLUGIN=true react-scripts build",
+    "build": "cross-env DISABLE_ESLINT_PLUGIN=true react-scripts build",
     "deploy": "npm run build && permaweb-deploy --deploy-folder ./build --ant-process $DEPLOY_ANT_PROCESS --undername=arcao",
     "format": "prettier --write .",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
@@ -46,6 +46,7 @@
     "@testing-library/react": "^14.0.0",
     "@types/jest": "^29.5.14",
     "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0"
+    "@types/react-dom": "^18.2.0",
+    "cross-env": "^7.0.3"
   }
 }
