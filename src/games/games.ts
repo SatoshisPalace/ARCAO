@@ -49,7 +49,7 @@ export const games: Game[] = [
     creator: "Rune Realm",
     creatorLogo: '/Creator_Logos/rune_realm.png',
     externalLink: 'https://runerealm.satoshispalace.casino'
-  },
+  }
   // {
   //   id: 'TOWER_GAME',
   //   title: 'Tower Game',
@@ -59,12 +59,12 @@ export const games: Game[] = [
   //   creatorLogo: '/Creator_Logos/sp.ico',
   //   externalLink: 'https://tower.satoshispalace.casino'
   // },
-  {
-    id: 'Ghost_Hunt',
-    title: 'Ghost Hunt',
-    description: 'Play with friends to survive waves of ghosts. Compete for the highest score!',
-    status: 'coming_soon',
-    creator: 'ARCAO',
-    creatorLogo: '/Creator_Logos/arcao.ico'
-  }
+  // {
+  //   id: 'Ghost_Hunt',
+  //   title: 'Ghost Hunt',
+  //   description: 'Play with friends to survive waves of ghosts. Compete for the highest score!',
+  //   status: 'coming_soon',
+  //   creator: 'ARCAO',
+  //   creatorLogo: '/Creator_Logos/arcao.ico'
+  // }
 ];
