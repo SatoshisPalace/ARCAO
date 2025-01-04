@@ -8,6 +8,7 @@
     "@permaweb/aoconnect": "^0.0.62",
     "@types/styled-components": "^5.1.34",
     "cra-template-typescript": "1.2.0",
+    "permaweb-deploy": "^1.1.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
