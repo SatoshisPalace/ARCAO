@@ -60,39 +60,39 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
 
   return (
     <header className="header">
-      <img 
-        src={require('../assets/logo.png')} 
-        alt="Arc Logo" 
-        className="header-logo" 
-        onClick={toggleSidebar}
+      <img
+        src={require('../assets/logo.png')}
+        alt="Arc Logo"
+        className="header-logo"
+        // onClick={toggleSidebar}
         style={{ cursor: 'pointer' }}
       />
-      
+
       <div className="nav-container">
         <div className="radio-inputs">
           <label className="radio">
-            <input 
-              type="radio" 
-              name="section" 
-              checked={activeSection === 'start'} 
+            <input
+              type="radio"
+              name="section"
+              checked={activeSection === 'start'}
               onChange={() => scrollToSection('start')}
             />
             <span className="name">Start</span>
           </label>
           <label className="radio">
-            <input 
-              type="radio" 
-              name="section" 
-              checked={activeSection === 'games'} 
+            <input
+              type="radio"
+              name="section"
+              checked={activeSection === 'games'}
               onChange={() => scrollToSection('games')}
             />
             <span className="name">Games</span>
           </label>
           <label className="radio">
-            <input 
-              type="radio" 
-              name="section" 
-              checked={activeSection === 'about'} 
+            <input
+              type="radio"
+              name="section"
+              checked={activeSection === 'about'}
               onChange={() => scrollToSection('about')}
             />
             <span className="name">About Us</span>
