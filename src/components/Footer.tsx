@@ -6,17 +6,17 @@ const Footer: React.FC = () => {
     {
       name: 'Twitter',
       icon: require('../assets/x.png'),
-      url: 'https://twitter.com/ArcadeOnArweave'
+      url: 'https://x.com/Arc_AO'
     },
     {
       name: 'Discord',
       icon: require('../assets/discord.png'),
-      url: 'https://discord.gg/arcadeonarweave'
+      url: 'https://discord.com/invite/arc-ao'
     },
     {
       name: 'Telegram',
       icon: require('../assets/telegram.png'),
-      url: 'https://t.me/arcadeonarweave'
+      url: 'https://t.me/ArcAOGames'
     }
   ];
 
